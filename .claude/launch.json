@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "MCP HTTP Server",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["dist/mcp/index.js"],
+      "port": 3000
+    },
+    {
+      "name": "MCP Dev Server (hot reload)",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["node_modules/.bin/nodemon", "--watch", "src", "--ext", "ts", "--exec", "npm run build && node dist/mcp/index.js"],
+      "port": 3000
+    }
+  ]
+}

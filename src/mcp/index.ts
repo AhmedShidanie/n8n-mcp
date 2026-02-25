@@ -1,5 +1,8 @@
 #!/usr/bin/env node
 
+import dotenv from 'dotenv';
+dotenv.config();
+
 import { N8NDocumentationMCPServer } from './server';
 import { logger } from '../utils/logger';
 import { TelemetryConfigManager } from '../telemetry/config-manager';

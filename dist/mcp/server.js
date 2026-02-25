@@ -485,6 +485,7 @@ class N8NDocumentationMCPServer {
                     });
                 }
             }
+            processedArgs = this.coerceStringifiedJsonParams(name, processedArgs);
             try {
                 logger_1.logger.debug(`Executing tool: ${name}`, { args: processedArgs });
                 const startTime = Date.now();
@@ -794,6 +795,40 @@ class N8NDocumentationMCPServer {
             }
         }
         return true;
+    }
+    coerceStringifiedJsonParams(toolName, args) {
+        if (!args || typeof args !== 'object')
+            return args;
+        const allTools = [...tools_1.n8nDocumentationToolsFinal, ...tools_n8n_manager_1.n8nManagementTools];
+        const tool = allTools.find(t => t.name === toolName);
+        if (!tool?.inputSchema?.properties)
+            return args;
+        const properties = tool.inputSchema.properties;
+        const coerced = { ...args };
+        for (const [key, value] of Object.entries(coerced)) {
+            if (typeof value !== 'string')
+                continue;
+            const expectedType = properties[key]?.type;
+            if (expectedType !== 'object' && expectedType !== 'array')
+                continue;
+            const trimmed = value.trim();
+            const validPrefix = (expectedType === 'object' && trimmed.startsWith('{'))
+                || (expectedType === 'array' && trimmed.startsWith('['));
+            if (!validPrefix)
+                continue;
+            try {
+                const parsed = JSON.parse(trimmed);
+                const isArray = Array.isArray(parsed);
+                if ((expectedType === 'object' && typeof parsed === 'object' && !isArray)
+                    || (expectedType === 'array' && isArray)) {
+                    coerced[key] = parsed;
+                    logger_1.logger.warn(`Coerced stringified ${expectedType} param "${key}" for tool "${toolName}"`);
+                }
+            }
+            catch {
+            }
+        }
+        return coerced;
     }
     async executeTool(name, args) {
         args = args || {};
